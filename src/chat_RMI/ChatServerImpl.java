@@ -7,6 +7,7 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 /**
  *
@@ -15,10 +16,12 @@ import java.util.Map;
 public class ChatServerImpl extends UnicastRemoteObject implements ChatServerInterface 
 {
     Map<Integer,String> messages;
+    private static Vector callbackObjects; 
     
     public ChatServerImpl() throws RemoteException {
         super();
         this.messages = new HashMap();
+        callbackObjects = new Vector();
     }
     
     @Override
@@ -39,6 +42,25 @@ public class ChatServerImpl extends UnicastRemoteObject implements ChatServerInt
             return messages.get(id);
         }else
             return "id not exists"; 
+    }
+    
+    @Override
+    public String getMessage2(String txt){
+        if(messages.containsValue(txt)){
+            return txt;
+        }else
+            return "Text not exists"; 
+    }
+    @Override
+    public void addCallback(ChatCallbackInterface CallbackObject){
+        // store the callback object into the vector
+        System.out.println("Server got an 'addCallback' call.");
+        callbackObjects.addElement (CallbackObject);
+    }
+    
+    public static void callback(int idClient) throws RemoteException{
+        ChatCallbackInterface client = (ChatCallbackInterface)callbackObjects.elementAt(idClient);
+        client.callMe("server call client " + idClient);
     }
     
     public static void main(String[] args){

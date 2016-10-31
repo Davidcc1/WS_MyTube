@@ -8,16 +8,16 @@ import java.rmi.RemoteException;
 import java.util.Random;
 import java.util.Scanner;
 
-public class HelloClient 
+public class ChatClientImpl 
 { 
     public static void main(String[] arg) throws IOException 
     {
-        HelloInterface obj = null;
+        ChatServerInterface obj = null;
         Random rdm = new Random();
         String text= "";
         try 
         { 
-           obj = (HelloInterface) Naming.lookup( "//localhost/Hello");
+           obj = (ChatServerInterface) Naming.lookup( "//localhost/Hello");
         } 
         catch (Exception e) 
         { 
@@ -31,19 +31,21 @@ public class HelloClient
         while (!text.equals("!!")){
             System.out.println("Type your message or FIND to find a text or !! to leave");
             text = br.readLine();
-            int id = rdm.hashCode();
             if(obj!=null){
                 try{
-                    obj.sendMessage(id ,text);
+                    int idMessage = obj.sendMessage(text);
+                    System.out.println("Message Sent");
+                    if (text.equals("FIND")){
+                        Scanner read = new Scanner(System.in);
+                        System.out.println("Find an ID");
+                        int idText = read.nextInt();
+                        System.out.println("The message with id: "+ idText +" is: "+obj.getMessage(idText));
+                    }
+                    else{
+                        System.out.println("Id message: " + idMessage);
+                    }
                 }catch(RemoteException e){
                 }
-                System.out.println("Message Sent");
-            }
-            if (text.equals("FIND")){
-                Scanner read = new Scanner(System.in);
-                System.out.println("Find an ID");
-                int idText = read.nextInt();
-                System.out.println(obj.getMessage(idText));
             }
         }
         

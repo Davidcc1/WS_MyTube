@@ -3,6 +3,7 @@ package helloclient;
 
 import java.rmi.registry.Registry;
 import java.rmi.RemoteException; 
+import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,31 +12,25 @@ import java.util.Map;
  *
  * @author David
  */
-public class HelloServer extends UnicastRemoteObject implements HelloInterface 
+public class ChatServerImpl extends UnicastRemoteObject implements ChatServerInterface 
 {
     Map<Integer,String> messages;
     
-    public HelloServer() throws RemoteException {
+    public ChatServerImpl() throws RemoteException {
         super();
         this.messages = new HashMap();
     }
     
     @Override
-    public void register(HelloClient client) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    @Override
-    public void unregister(HelloClient client) throws RemoteException {
+    public void register(ChatClientImpl client) throws RemoteException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     @Override
-    public void sendMessage(int idmessage, String message) throws RemoteException {
-        
+    public int sendMessage(String message) throws RemoteException {
+        int idmessage = messages.hashCode();
         messages.put(idmessage, message);
-        System.out.println("Id message : "+idmessage);
-        System.out.println("Message: "+message);
+        return idmessage;
     }
     
     @Override
@@ -48,9 +43,9 @@ public class HelloServer extends UnicastRemoteObject implements HelloInterface
     
     public static void main(String[] args){
         try{
-            HelloServer obj = new HelloServer();
-            Registry r = java.rmi.registry.LocateRegistry.createRegistry(1099);
-            r.rebind("Hello", obj);
+            ChatServerImpl obj = new ChatServerImpl();
+            Registry r =LocateRegistry.createRegistry(1099);
+            r.bind("Hello", obj);
             System.out.println("Server is connected");
         } catch(Exception e){
             System.out.println("Server not connected: " + e);

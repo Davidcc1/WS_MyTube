@@ -57,7 +57,7 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
     }
     
     @Override
-    public String getMessage2(String txt){
+    public String getMessage(String txt){
         if(messages.containsValue(txt)){
             return txt;
         }else
@@ -99,11 +99,14 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
     
     public static void main(String[] args){
         try{ 
-            MytubeServerImpl obj = new MytubeServerImpl();
+            MytubeServer obj = new MytubeServerImpl();
             String registry = "localhost";
+            
             if (args.length >= 1) {
                 registry = args[0];
             }
+            //String registryURL="rmi://localhost:"+1099+"/some";
+            //Naming.rebind(registryURL,obj);
             Registry r =LocateRegistry.createRegistry(1099);
             r.list();
             r.rebind("Mytube", obj);

@@ -21,6 +21,8 @@ public class MytubeCallbackImpl extends UnicastRemoteObject implements MytubeCal
 
     public static void main(String[] args) {
         try {
+            //String registryURL = "rmi://localhost:"+1099+"/some";
+            //obj = (MytubeServer) Naming.lookup(registryURL);
             Registry registry=LocateRegistry.getRegistry("localhost",1099);
             mytube = (MytubeServer)registry.lookup("Mytube");
             

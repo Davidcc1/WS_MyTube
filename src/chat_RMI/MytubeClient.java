@@ -11,8 +11,8 @@ import java.util.Scanner;
  *
  * @author David
  */
-public class MytubeClientImpl{ 
-    MytubeClientImpl() throws IOException,RemoteException{
+public class MytubeClient{ 
+    MytubeClient() throws IOException,RemoteException{
         super();
         int idClient = hashCode();
         MytubeServer obj = null;
@@ -20,8 +20,10 @@ public class MytubeClientImpl{
         
         
         try {
+           //String registryURL = "rmi://localhost:"+1099+"/some";
+            //obj = (MytubeServer) Naming.lookup(registryURL);
            Registry registry=LocateRegistry.getRegistry("localhost",1099);
-           obj = (MytubeServer) registry.lookup( "Mytube");
+           obj = (MytubeServer) registry.lookup("Mytube");
            
         }catch (Exception e){
            System.out.println("MytubeClient exception: " + e.getMessage()); 
@@ -33,14 +35,14 @@ public class MytubeClientImpl{
         while (!text.equals("!!")){
             System.out.println("1   - Type your message");
             System.out.println("2   - Type !FIND to find a text");
-            System.out.println("3   - Type !MyDesc to get a list of your contents");
+            System.out.println("3   - Type !LIST to get a list of your contents");
             System.out.println("4   - Type !! to leave");
             
             text = br.readLine();
             if(obj!=null){
                 try{
                     Scanner read = new Scanner(System.in);
-                    if (text.equals("!MyDesc")){
+                    if (text.equals("!LIST")){
                         System.out.println(obj.getMessagesFromClient(idClient));
                         System.out.println();
                         System.out.println("    Now you can delete or modify one");
@@ -76,7 +78,7 @@ public class MytubeClientImpl{
                             if(text.equals("Text")){
                                 System.out.println("    Type the text: ");
                                 text = br.readLine();
-                                System.out.println("    The message: "+ obj.getMessage2(text) +" is in server database ");
+                                System.out.println("    The message: "+ obj.getMessage(text) +" is in server database ");
                                 System.out.println();
                                 }   
                         }else if(!text.equals("!!")){
@@ -96,7 +98,7 @@ public class MytubeClientImpl{
     }
     public static void main(String[] arg) throws IOException 
     {
-        MytubeClientImpl client = new MytubeClientImpl();
+        MytubeClient client = new MytubeClient();
         
     } 
 } 

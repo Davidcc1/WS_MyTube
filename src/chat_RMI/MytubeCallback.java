@@ -5,12 +5,12 @@
  */
 package chat_RMI;
 
-import java.rmi.RemoteException;
+import java.rmi.*;
 
 /**
  *
- * @author Usuario
+ * @author David
  */
-public interface ChatCallbackInterface {
+public interface MytubeCallback extends Remote {
     public void callMe(String message) throws RemoteException;
 }

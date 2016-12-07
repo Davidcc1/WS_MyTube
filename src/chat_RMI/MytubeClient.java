@@ -13,10 +13,6 @@ import java.util.Random;
  * @author David
  */
 public class MytubeClient{
-    //MytubeClient() throws IOException,RemoteException{
-        //super();
-
-    //}
     public static void main(String args[]) throws IOException
     {
       Random randomGenerator = new Random();

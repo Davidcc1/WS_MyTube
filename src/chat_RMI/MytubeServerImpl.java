@@ -96,24 +96,4 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
         System.out.println("Server got an 'addCallback' call.");
         callbackObjects.addElement(CallbackObject);
     }
-
-    /*public static void main(String[] args){
-        try{
-            MytubeServer obj = new MytubeServerImpl();
-            String registry = "localhost";
-
-            if (args.length >= 1) {
-                registry = args[0];
-            }
-            //String registryURL="rmi://localhost:"+1099+"/some";
-            //Naming.rebind(registryURL,obj);
-            Registry r =LocateRegistry.createRegistry(1099);
-            r.list();
-            r.rebind("Mytube", obj);
-            System.out.println("Server is connected");
-        } catch(Exception e){
-            System.out.println("Server not connected: " + e);
-        }
-
-    }*/
 }

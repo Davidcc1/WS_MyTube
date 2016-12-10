@@ -9,11 +9,13 @@ import java.util.List;
  */
 public interface MytubeServer extends Remote {
 
-    public int sendMessage(String message,int idClient) throws RemoteException;
-    public String getMessage(int idClient) throws RemoteException;
-    public String getMessage(String txt) throws RemoteException;
+    public String setIdClient() throws RemoteException;
+    public int setDescription(String description,String idClient) throws RemoteException;
+    public String getDescription(int id) throws RemoteException;
+    public String getDescription(String txt) throws RemoteException;
     public void addCallback(MytubeCallbackImpl CallbackObject) throws RemoteException;
-    public List getMessagesFromClient(int idClient) throws RemoteException;
-    public String deleteMessage(int idMessage) throws RemoteException;
-    public String modifyMessage(int idMessage,String text) throws RemoteException;
+    public List getDescriptionsFromClient(String idClient) throws RemoteException;
+    public String deleteDescription(int idDescription) throws RemoteException;
+    public String modifyDescription(int idDescription,String text) throws RemoteException;
+    public String updateVideo(byte[] video, String idClient, String name) throws RemoteException;
 }

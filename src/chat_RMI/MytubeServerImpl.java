@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.UUID;
 
 /**
  *
@@ -17,78 +18,89 @@ import java.util.Vector;
  */
 public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServer
 {
-    Map<Integer,String> messages;
-    Map<Integer,List<Integer>> clientMessages;
+    Map<Integer,String> descriptions;
+    Map<String,List<Integer>> clientDescriptions;
     private static Vector<MytubeCallbackImpl> callbackObjects;
 
     public MytubeServerImpl() throws RemoteException {
         super();
-        this.messages = new HashMap<>();
-        this.clientMessages = new HashMap<>();
+        this.descriptions = new HashMap<>();
+        this.clientDescriptions = new HashMap<>();
         callbackObjects = new Vector<>();
     }
 
-    @Override
-    public int sendMessage(String message, int idClient) throws RemoteException {
-        int idmessage = messages.hashCode();
-        messages.put(idmessage, message);
-        if(!clientMessages.containsKey(idClient)){
-            List messagesByClient = new ArrayList();
-            messagesByClient.add(idmessage);
-            clientMessages.put(idClient,messagesByClient);
-        }else{
-            clientMessages.get(idClient).add(idmessage);
-        }
-        for(int i=0;i<callbackObjects.size();i++){
-            MytubeCallbackImpl client = callbackObjects.elementAt(i);
-            client.callMe(message);
-        }
-        System.out.println("Client "+ idClient +" sends :"+message);
-        return idmessage;
+    public String setIdClient(){
+      String id = UUID.randomUUID().toString();
+      return id;
     }
 
     @Override
-    public String getMessage(int id){
-        if(messages.containsKey(id)){
-            return messages.get(id);
+    public int setDescription(String description, String idClient) throws RemoteException {
+        int idDescription = descriptions.hashCode();
+        descriptions.put(idDescription, description);
+        if(!clientDescriptions.containsKey(idClient)){
+            List clientDescription = new ArrayList();
+            clientDescription.add(idDescription);
+            clientDescriptions.put(idClient,clientDescription);
+        }else{
+            clientDescriptions.get(idClient).add(idDescription);
+        }
+        for(int i=0;i<callbackObjects.size();i++){
+            MytubeCallbackImpl client = callbackObjects.elementAt(i);
+            client.callMe(description);
+        }
+        System.out.println("Client "+ idClient +" sends :"+ description);
+        return idDescription;
+    }
+
+    @Override
+    public String getDescription(int id){
+        if(descriptions.containsKey(id)){
+            return descriptions.get(id);
         }else
             return "id not exists";
     }
 
     @Override
-    public String getMessage(String txt){
-        if(messages.containsValue(txt)){
+    public String getDescription(String txt){
+        if(descriptions.containsValue(txt)){
             return txt;
         }else
             return "Text not exists";
     }
 
     @Override
-    public List getMessagesFromClient(int idClient) throws RemoteException {
-        System.out.println("Client " + idClient + "get a list of his messages");
-        return clientMessages.get(idClient);
+    public List getDescriptionsFromClient(String idClient) throws RemoteException {
+        System.out.println("Client " + idClient + "get a list of his Descriptions");
+        return clientDescriptions.get(idClient);
     }
 
     @Override
-    public String deleteMessage(int idMessage) throws RemoteException {
-        if (messages.containsKey(idMessage)){
-            String deleted = messages.remove(idMessage);
-            System.out.println("Message "+ deleted+" was deleted");
-            return "Message "+ deleted +" was deleted";
+    public String deleteDescription(int idDescription) throws RemoteException {
+        if (descriptions.containsKey(idDescription)){
+            String deleted = descriptions.remove(idDescription);
+            System.out.println("Description "+ deleted+" was deleted");
+            return "Description "+ deleted +" was deleted";
         }
         return "id not exist";
     }
 
     @Override
-    public String modifyMessage(int idMessage, String text) throws RemoteException {
-        if (messages.containsKey(idMessage)){
-            String changed = messages.get(idMessage);
-            messages.remove(idMessage);
-            messages.put(idMessage, text);
+    public String modifyDescription(int idDescription, String text) throws RemoteException {
+        if (descriptions.containsKey(idDescription)){
+            String changed = descriptions.get(idDescription);
+            descriptions.remove(idDescription);
+            descriptions.put(idDescription, text);
             System.out.println("Description ("+ changed +") is now ("+text+")");
             return "Description ("+ changed +") is now ("+text+")";
         }
         return "id not exist";
+    }
+
+    @Override
+    public String updateVideo(byte[] video, String idClient, String name) throws RemoteException{
+          System.out.println("Client "+ idClient +" is trying to update the video: "+ name);
+          return "not implemented yet";
     }
 
     @Override

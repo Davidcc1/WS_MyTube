@@ -20,13 +20,12 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
 {
     Map<Integer,String> descriptions;
     Map<String,List<Integer>> clientDescriptions;
-    private static Vector<MytubeCallbackImpl> callbackObjects;
+    Map<Integer, byte[]> videos;
 
     public MytubeServerImpl() throws RemoteException {
         super();
         this.descriptions = new HashMap<>();
         this.clientDescriptions = new HashMap<>();
-        callbackObjects = new Vector<>();
     }
 
     public String setIdClient(){
@@ -37,7 +36,12 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
     @Override
     public int setDescription(String description, String idClient) throws RemoteException {
         int idDescription = descriptions.hashCode();
-        descriptions.put(idDescription, description);
+        if(!descriptions.containsKey(idDescription)){
+          descriptions.put(idDescription, description);
+        }else{
+         idDescription = descriptions.hashCode();
+         descriptions.put(idDescription, description);
+        }
         if(!clientDescriptions.containsKey(idClient)){
             List clientDescription = new ArrayList();
             clientDescription.add(idDescription);
@@ -45,10 +49,7 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
         }else{
             clientDescriptions.get(idClient).add(idDescription);
         }
-        for(int i=0;i<callbackObjects.size();i++){
-            MytubeCallbackImpl client = callbackObjects.elementAt(i);
-            client.callMe(description);
-        }
+
         System.out.println("Client "+ idClient +" sends :"+ description);
         return idDescription;
     }
@@ -100,12 +101,7 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
     @Override
     public String updateVideo(byte[] video, String idClient, String name) throws RemoteException{
           System.out.println("Client "+ idClient +" is trying to update the video: "+ name);
-          return "not implemented yet";
-    }
 
-    @Override
-    public void addCallback(MytubeCallbackImpl CallbackObject){
-        System.out.println("Server got an 'addCallback' call.");
-        callbackObjects.addElement(CallbackObject);
+          return "not implemented yet";
     }
 }

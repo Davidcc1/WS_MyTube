@@ -83,8 +83,7 @@ public class MytubeClient{
                           System.out.println();
                       }
 
-                  }else{
-                      if (text.equals("!FIND")){
+                  }else if (text.equals("!FIND")){
                           System.out.println("    Type 'ID' or Type 'Text'");
                           text = br.readLine();
                           if(text.equals("ID")){
@@ -99,21 +98,18 @@ public class MytubeClient{
                               System.out.println("    The Description: "+ obj.getDescription(text) +" is in server database ");
                               System.out.println();
                               }
-                          }
-                      if (text.equals("!UPDATE")){
+                  }else if (text.equals("!UPDATE")){
                         text = br.readLine();
                         bytes = convert(text);
                         System.out.println(obj.updateVideo(bytes, idClient, text));
-                      }else if(!text.equals("!!")){
+                  }else if(!text.equals("!!")){
                           int idDescription = obj.setDescription(text,idClient);
                           System.out.println("    Id Description: " + idDescription);
                           System.out.println();
-                      }else{
+                  }else{
                           System.out.println();
                           System.out.println("BYE!!");
-                      }
-
-              }
+                  }
             }catch(RemoteException e){
                   System.err.println("Exception: " + e.getMessage());
               }

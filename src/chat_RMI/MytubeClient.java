@@ -9,7 +9,6 @@ import java.io.FileInputStream;
 import java.rmi.*;
 import java.rmi.registry.*;
 import java.util.Scanner;
-import java.util.Random;
 
 /**
  *
@@ -102,13 +101,12 @@ public class MytubeClient{
                         text = br.readLine();
                         bytes = convert(text);
                         System.out.println(obj.updateVideo(bytes, idClient, text));
-                  }else if(!text.equals("!!")){
+                  }else if(!text.equals("!!") && !text.equals("")){
                           int idDescription = obj.setDescription(text,idClient);
                           System.out.println("    Id Description: " + idDescription);
                           System.out.println();
                   }else{
                           System.out.println();
-                          System.out.println("BYE!!");
                   }
             }catch(RemoteException e){
                   System.err.println("Exception: " + e.getMessage());

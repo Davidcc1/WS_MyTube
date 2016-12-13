@@ -1,17 +1,21 @@
 
 package chat_RMI;
 
-import java.rmi.registry.Registry;
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 import java.util.UUID;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import sun.net.www.protocol.http.HttpURLConnection;
+import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 /**
  *
  * @author David
@@ -49,6 +53,36 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
         }else{
             clientDescriptions.get(idClient).add(idDescription);
         }
+        //POST
+        String output = "";
+        try{
+          String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/client/"+idClient+"/desc";
+          URL url = new URL (URLComplete);
+          HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+          conn.setDoOutput(true);
+          conn.setRequestMethod("POST");
+          conn.setRequestProperty("Content-Type", "application/json");
+
+          String input = "{\"id\":"+idDescription+"\"}";
+          OutputStream os = conn.getOutputStream();
+          os.write(input.getBytes());
+          os.flush();
+
+          if(conn.getResponseCode() != HttpURLConnection.HTTP_CREATED){
+            throw new RuntimeException("Failed: HTTP error code: "+conn.getResponseCode());
+          }
+          BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+          while((output = br.readLine()) != null){
+            System.out.println("\nClient json: "+ output );
+
+          }
+          conn.disconnect();
+        }catch(MalformedURLException e){
+          e.printStackTrace();
+        }catch(IOException e){
+          e.printStackTrace();
+        }
 
         System.out.println("Client "+ idClient +" sends :"+ description);
         return idDescription;
@@ -72,6 +106,29 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
 
     @Override
     public List getDescriptionsFromClient(String idClient) throws RemoteException {
+      //GET
+      String output = "";
+      try{
+        String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/client/"+idClient;
+        URL url = new URL (URLComplete);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+
+        if(conn.getResponseCode() != 200){
+          throw new RuntimeException("Failed: HTTP error code: "+conn.getResponseCode());
+        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+        while((output = br.readLine()) != null){
+          System.out.println("\nClient json: "+ output );
+
+        }
+        conn.disconnect();
+      }catch(MalformedURLException e){
+        e.printStackTrace();
+      }catch(IOException e){
+        e.printStackTrace();
+      }
         System.out.println("Client " + idClient + "get a list of his Descriptions");
         return clientDescriptions.get(idClient);
     }

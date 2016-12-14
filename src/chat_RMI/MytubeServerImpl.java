@@ -56,14 +56,13 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
         //POST
         String output = "";
         try{
-          String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/client/"+idClient+"/desc";
+          String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/desc";
           URL url = new URL (URLComplete);
           HttpURLConnection conn = (HttpURLConnection) url.openConnection();
           conn.setDoOutput(true);
           conn.setRequestMethod("POST");
           conn.setRequestProperty("Content-Type", "application/json");
-
-          String input = "{\"id\":"+idDescription+"\"}";
+          String input = "{\"client\":\""+idClient+"\",\"desc\":\""+description+"\",\"id\":\""+idDescription+"\"}";
           OutputStream os = conn.getOutputStream();
           os.write(input.getBytes());
           os.flush();
@@ -75,7 +74,6 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
 
           while((output = br.readLine()) != null){
             System.out.println("\nClient json: "+ output );
-
           }
           conn.disconnect();
         }catch(MalformedURLException e){

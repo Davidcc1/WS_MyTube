@@ -78,7 +78,7 @@ public class MytubeClient{
                           int idText = read.nextInt();
                           System.out.println("    Now set a new description: ");
                           text = br.readLine();
-                          System.out.println(obj.modifyDescription(idText,text));
+                          System.out.println(obj.modifyDescription(idClient,idText,text));
                           System.out.println();
                       }
 

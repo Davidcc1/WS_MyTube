@@ -10,7 +10,8 @@ public class MyTubeConectServ {
   public static void main(String args[]){
     try{
       MytubeServer obj = new MytubeServerImpl();
-      int numPort = Integer.parseInt(args[0]);
+      //int numPort = Integer.parseInt(args[0]);
+      int numPort = 2000;
       startRegistry(numPort);
       String registryURL = "rmi://localhost:"+numPort+"/myTube";
       Naming.rebind(registryURL, obj);

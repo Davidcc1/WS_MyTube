@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.Arrays;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -16,6 +17,9 @@ import java.io.OutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import javax.ws.rs.core.MediaType;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 /**
  *
  * @author David
@@ -63,6 +67,7 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
           conn.setRequestMethod("POST");
           conn.setRequestProperty("Content-Type", "application/json");
           String input = "{\"client\":\""+idClient+"\",\"desc\":\""+description+"\",\"id\":\""+idDescription+"\"}";
+
           OutputStream os = conn.getOutputStream();
           os.write(input.getBytes());
           os.flush();
@@ -88,29 +93,14 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
 
     @Override
     public String getDescription(int id){
-        if(descriptions.containsKey(id)){
-            return descriptions.get(id);
-        }else
-            return "id not exists";
-    }
-
-    @Override
-    public String getDescription(String txt){
-        if(descriptions.containsValue(txt)){
-            return txt;
-        }else
-            return "Text not exists";
-    }
-
-    @Override
-    public List getDescriptionsFromClient(String idClient) throws RemoteException {
       //GET
       String output = "";
       try{
-        String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/client/"+idClient;
+        String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/desc/"+id;
         URL url = new URL (URLComplete);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
+	conn.setRequestProperty("Accept", MediaType.APPLICATION_JSON);
 
         if(conn.getResponseCode() != 200){
           throw new RuntimeException("Failed: HTTP error code: "+conn.getResponseCode());
@@ -122,6 +112,51 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
 
         }
         conn.disconnect();
+	      Gson json = new Gson();
+        String out = json.fromJson(output,String.class);
+
+        return out;
+      }catch(MalformedURLException e){
+        e.printStackTrace();
+      }catch(IOException e){
+        e.printStackTrace();
+      }
+      return "not connected";
+
+    }
+
+    @Override
+    public String getDescription(String txt){
+        if(descriptions.containsValue(txt)){
+            return txt;
+        }else
+            return "Text not exists";
+    }
+
+    @Override
+    public List<Integer> getDescriptionsFromClient(String idClient) throws RemoteException {
+      //GET
+      String output = "";
+      try{
+        String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/client/"+idClient+"/descs";
+        URL url = new URL (URLComplete);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+	      conn.setRequestProperty("Accept", MediaType.APPLICATION_JSON);
+
+        if(conn.getResponseCode() != 200){
+          throw new RuntimeException("Failed: HTTP error code: "+conn.getResponseCode());
+        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+        while((output = br.readLine()) != null){
+          System.out.println("\nClient json: "+ output );
+        }
+        conn.disconnect();
+        Gson json = new Gson();
+        String[] desc = json.fromJson(output,String[].class);
+        List<String> descs = new ArrayList<>(Arrays.asList(desc));
+
       }catch(MalformedURLException e){
         e.printStackTrace();
       }catch(IOException e){
@@ -138,11 +173,27 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
             System.out.println("Description "+ deleted+" was deleted");
             return "Description "+ deleted +" was deleted";
         }
-        return "id not exist";
+        String output = "";
+        try{
+          String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/desc/"+idDescription+"/delete";
+          URL url = new URL (URLComplete);
+          HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+          conn.setRequestMethod("DELETE");
+  	      conn.setRequestProperty("Content-Type", MediaType.APPLICATION_JSON);
+          if(conn.getResponseCode() != 200){
+            throw new RuntimeException("Failed: HTTP error code: "+conn.getResponseCode());
+          }
+          return "description deleted";
+        }catch(MalformedURLException e){
+          e.printStackTrace();
+        }catch(IOException e){
+          e.printStackTrace();
+        }
+        return "Description "+idDescription+" was deleted";
     }
 
     @Override
-    public String modifyDescription(int idDescription, String text) throws RemoteException {
+    public String modifyDescription(String idClient, int idDescription, String text) throws RemoteException {
         if (descriptions.containsKey(idDescription)){
             String changed = descriptions.get(idDescription);
             descriptions.remove(idDescription);
@@ -150,13 +201,72 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
             System.out.println("Description ("+ changed +") is now ("+text+")");
             return "Description ("+ changed +") is now ("+text+")";
         }
+        String output = "";
+        try{
+        String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/desc/"+idDescription+"/modify";
+        URL url = new URL (URLComplete);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("PUT");
+        conn.setRequestProperty("Content-Type", MediaType.APPLICATION_JSON);
+        String input = "{\"client\":\""+idClient+"\",\"desc\":\""+text+"\",\"id\":\""+idDescription+"\"}";
+
+        OutputStream os = conn.getOutputStream();
+        os.write(input.getBytes());
+        os.flush();
+
+        if(conn.getResponseCode() != 200){
+          throw new RuntimeException("Failed: HTTP error code: "+conn.getResponseCode());
+        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+        while((output = br.readLine()) != null){
+          System.out.println("\nClient json: "+ output );
+        }
+        conn.disconnect();
+      }catch(MalformedURLException e){
+        e.printStackTrace();
+      }catch(IOException e){
+        e.printStackTrace();
+      }
+
         return "id not exist";
     }
 
     @Override
     public String updateVideo(byte[] video, String idClient, String name) throws RemoteException{
-          System.out.println("Client "+ idClient +" is trying to update the video: "+ name);
+	     System.out.println("Client "+ idClient +" is trying to update the video: "+ name);
+	//POST
+        String output = "";
+        try{
+          String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/video";
+          URL url = new URL (URLComplete);
+          HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+          conn.setDoOutput(true);
+          conn.setRequestMethod("PUT");
+          conn.setRequestProperty("Content-Type", "application/json");
 
-          return "not implemented yet";
+	  Gson json = new Gson();
+	  String input = json.toJson(video);
+
+          OutputStream os = conn.getOutputStream();
+          os.write(input.getBytes());
+          os.flush();
+
+          if(conn.getResponseCode() != HttpURLConnection.HTTP_CREATED){
+            throw new RuntimeException("Failed: HTTP error code: "+conn.getResponseCode());
+          }
+          BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+          while((output = br.readLine()) != null){
+            System.out.println("\nClient json: "+ output );
+          }
+          conn.disconnect();
+	  return name;
+    }catch(MalformedURLException e){
+      e.printStackTrace();
+    }catch(IOException e){
+      e.printStackTrace();
     }
+        return "video "+name+" was updated";
+  }
 }

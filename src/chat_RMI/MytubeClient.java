@@ -54,7 +54,8 @@ public class MytubeClient{
           System.out.println("2   - Type !UPDATE to update a video");
           System.out.println("3   - Type !FIND to find a description");
           System.out.println("4   - Type !LIST to get a list of your contents");
-          System.out.println("5   - Type !! to leave");
+          System.out.println("5   - Type !ALL to get a list of all contents");
+          System.out.println("6   - Type !! to leave");
 
           text = br.readLine();
           if(obj!=null){
@@ -81,6 +82,8 @@ public class MytubeClient{
                           System.out.println(obj.modifyDescription(idClient,idText,text));
                           System.out.println();
                       }
+                  }else if (text.equals("!ALL")){
+                      System.out.println(obj.getAllDesc(idClient));
 
                   }else if (text.equals("!FIND")){
                           System.out.println("    Type 'ID' or Type 'Text'");

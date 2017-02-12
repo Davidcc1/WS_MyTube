@@ -100,22 +100,22 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
         URL url = new URL (URLComplete);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
-	conn.setRequestProperty("Accept", MediaType.APPLICATION_JSON);
+	      conn.setRequestProperty("Accept", MediaType.APPLICATION_JSON);
 
         if(conn.getResponseCode() != 200){
           throw new RuntimeException("Failed: HTTP error code: "+conn.getResponseCode());
         }
         BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-
+        String sol = null;
         while((output = br.readLine()) != null){
           System.out.println("\nClient json: "+ output );
-
+          sol = output;
         }
         conn.disconnect();
-	      Gson json = new Gson();
-        String out = json.fromJson(output,String.class);
+	    Gson json = new Gson();
+            String out = json.fromJson(output,String.class);
 
-        return out;
+        return sol;
       }catch(MalformedURLException e){
         e.printStackTrace();
       }catch(IOException e){
@@ -134,9 +134,10 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
     }
 
     @Override
-    public List<Integer> getDescriptionsFromClient(String idClient) throws RemoteException {
+    public List<String> getDescriptionsFromClient(String idClient) throws RemoteException {
       //GET
       String output = "";
+      List<String> descs = null;
       try{
         String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/client/"+idClient+"/descs";
         URL url = new URL (URLComplete);
@@ -149,22 +150,57 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
         }
         BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
-        while((output = br.readLine()) != null){
-          System.out.println("\nClient json: "+ output );
-        }
+        output = br.readLine();
+        //descs.add(output);
         conn.disconnect();
         Gson json = new Gson();
         String[] desc = json.fromJson(output,String[].class);
-        List<String> descs = new ArrayList<>(Arrays.asList(desc));
+        descs = new ArrayList<>(Arrays.asList(desc));
+        System.out.println(descs);
 
+        System.out.println("Client " + idClient + "get a list of his Descriptions");
+        return descs;
       }catch(MalformedURLException e){
         e.printStackTrace();
       }catch(IOException e){
         e.printStackTrace();
       }
-        System.out.println("Client " + idClient + "get a list of his Descriptions");
-        return clientDescriptions.get(idClient);
+       return descs;
     }
+    
+      public List<String> getAllDesc(String idClient) throws RemoteException {
+      //GET
+      String output = "";
+      List<String> descs = null;
+      try{
+        String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/client/descs";
+        URL url = new URL (URLComplete);
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod("GET");
+	      conn.setRequestProperty("Accept", MediaType.APPLICATION_JSON);
+
+        if(conn.getResponseCode() != 200){
+          throw new RuntimeException("Failed: HTTP error code: "+conn.getResponseCode());
+        }
+        BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+        output = br.readLine();
+        conn.disconnect();
+        Gson json = new Gson();
+        String[] desc = json.fromJson(output,String[].class);
+        descs = new ArrayList<>(Arrays.asList(desc));
+        System.out.println(descs);
+
+        System.out.println("Client " + idClient + "get a list of his Descriptions");
+        return descs;
+      }catch(MalformedURLException e){
+        e.printStackTrace();
+      }catch(IOException e){
+        e.printStackTrace();
+      }
+       return descs;
+    }
+
 
     @Override
     public String deleteDescription(int idDescription) throws RemoteException {
@@ -233,20 +269,24 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
     }
 
     @Override
-    public String updateVideo(byte[] video, String idClient, String name) throws RemoteException{
-	     System.out.println("Client "+ idClient +" is trying to update the video: "+ name);
+    public String updateVideo(byte[] bytes, String idClient, String title) throws RemoteException{
+	     System.out.println("Client "+ idClient +" is trying to update the video: "+ title);
 	//POST
+        int idDesc = descriptions.hashCode();
         String output = "";
+        Video vid = new Video(idDesc,bytes,idClient, title);
         try{
-          String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/video";
+          String URLComplete = "http://localhost:8080/myRESTwsWeb/rest/video/";
           URL url = new URL (URLComplete);
           HttpURLConnection conn = (HttpURLConnection) url.openConnection();
           conn.setDoOutput(true);
-          conn.setRequestMethod("PUT");
+          conn.setRequestMethod("POST");
           conn.setRequestProperty("Content-Type", "application/json");
+          
+          //String input = "{\"client\":\""+idClient+"\",\"title\":\""+name+"\",\"video\":\""+video+"\"}";
 
 	  Gson json = new Gson();
-	  String input = json.toJson(video);
+	  String input = json.toJson(vid);
 
           OutputStream os = conn.getOutputStream();
           os.write(input.getBytes());
@@ -261,12 +301,12 @@ public class MytubeServerImpl extends UnicastRemoteObject implements MytubeServe
             System.out.println("\nClient json: "+ output );
           }
           conn.disconnect();
-	  return name;
+	  return title;
     }catch(MalformedURLException e){
       e.printStackTrace();
     }catch(IOException e){
       e.printStackTrace();
     }
-        return "video "+name+" was updated";
+        return "video "+title+" was updated";
   }
 }
